@@ -14,7 +14,7 @@ let gameState = {
   start: {
     ball: {
       position: [gameWidth / 2, gameHeight / 6],
-      velocity: [100, -200], // px/s
+      velocity: [100, -200] // px/s
     },
     player: {
       position: [gameWidth / 2, 7 * gameHeight / 8],
@@ -22,7 +22,7 @@ let gameState = {
     },
     gravity: 15
   },
-  gravity: 0, // velocity modifier,
+  gravity: 0, // velocity modifier
   score: 0,
   highScore: 0,
   difficultyModifier: 400
@@ -30,21 +30,20 @@ let gameState = {
 
 const applyMods = (gameState, deltaTime) => {
   let { player, ball } = gameState;
-  let secondsPassed = deltaTime / 1000;
 
   // vertical position
   let pos = ball.position;
 
-  let newPosition = ball.velocity.map(function(vel, idx){
-    return ((vel * deltaTime) / 1000) + pos[idx];
+  let newPosition = ball.velocity.map(function(velocity, idx) {
+    return ((velocity * deltaTime) / 1000) + pos[idx];
   });
 
   ball.position = newPosition;
 
   // ball-side collision
   if (
-    (ball.velocity[0] > 0 && ball.position[0] > (gameWidth - ball.radius))
-    || (ball.velocity[0] < 0 && ball.position[0] < ball.radius)
+    (ball.velocity[0] > 0 && ball.position[0] > (gameWidth - ball.radius)) ||
+    (ball.velocity[0] < 0 && ball.position[0] < ball.radius)
   ) {
     ball.velocity[0] *= -1;
   }
@@ -63,9 +62,8 @@ const applyMods = (gameState, deltaTime) => {
     ball.velocity[1] = ball.velocity[1] + gameState.gravity;
   }
 
-
   // game over
-  if (newPosition[1] > gameHeight + 100) {
+  if (ball.position[1] > gameHeight + 100) {
     reset(gameState);
   }
 
@@ -83,18 +81,7 @@ function playerCollision(gameState) {
     return false;
   }
 
-  let xd = player.position[0] - ball.position[0];
-  let yd = player.position[1] - ball.position[1];
-
-  let sqrRadius = Math.pow(player.radius + ball.radius, 2);
-
-  let distSqr = (xd * xd) + (yd * yd);
-
-  return distSqr <= sqrRadius;
-}
-
-function angleOfCollision(ball, player) {
-  return Math.abs(player.position[1] - ball.position[1]) / dist(...ball.position, ...player.position);
+  return dist(...ball.position, ...player.position) <= player.radius + ball.radius;
 }
 
 function sinOfCollision(ball, player) {
@@ -102,9 +89,8 @@ function sinOfCollision(ball, player) {
 }
 
 function gameStateToCanvasState(gameState) {
-  let ballRed = 50 - (Math.abs(gameState.ball.velocity[0]) / gameState.difficultyModifier) * 50 + 25;
-  ballRed = parseInt(ballRed);
-  let ballFill = `hsl(360, ${ballRed}%, 50%)`;
+  let effect = parseInt(50 - (Math.abs(gameState.ball.velocity[0]) / gameState.difficultyModifier) * 50 + 25);
+  let ballFill = `hsl(360, ${effect}%, 50%)`;
 
   let canvasState = {
     player: {
@@ -126,8 +112,8 @@ function gameStateToCanvasState(gameState) {
 
 function canvasStateToCtx(canvasState, ctx) {
   drawGround(canvasState.player, ctx);
-  drawCircle(canvasState.ball, ctx);
   drawCircle(canvasState.player, ctx);
+  drawCircle(canvasState.ball, ctx);
   drawScore(canvasState.score, canvasState.highScore, ctx);
 }
 
@@ -139,27 +125,26 @@ function drawCircle(entity, ctx) {
   ctx.fill();
 }
 
-function drawScore(score, high, ctx) {
+function drawScore(currentScore, highScore, ctx) {
   ctx.font = '20px sans-serif';
-  ctx.textAlign = 'left';
   ctx.fillStyle = '#aaa';
-  ctx.fillText(`Score: ${score}`, 20, 35);
 
-  ctx.font = '20px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Score: ${currentScore}`, 20, 35);
+
   ctx.textAlign = 'right';
-  ctx.fillText(`High score: ${high}`, gameWidth - 20, 35);
+  ctx.fillText(`High score: ${highScore}`, gameWidth - 20, 35);
 }
 
 function drawGround(player, ctx) {
   ctx.beginPath();
-  ctx.moveTo(0, player.position[1] + 0.5);
-  ctx.lineTo(gameWidth, player.position[1] + 0.5);
+  ctx.moveTo(0, player.position[1]);
+  ctx.lineTo(gameWidth, player.position[1]);
 
   ctx.lineWidth = 4;
   ctx.strokeStyle = player.fill;
   ctx.stroke();
 }
-
 
 function movePlayer(delta) {
   let { player } = gameState;
@@ -173,26 +158,13 @@ function mouseControl(e) {
   movePlayer(e.movementX);
 }
 
-function keyControl(e) {
-  let rate = 3;
-
-  console.log(e.which);
-  switch (e.which) {
-    case 37: movePlayer(rate * -1); break;
-    case 39: movePlayer(rate * 1); break;
-    default: break;
-  }
-}
-
 function reset(gameState) {
   let { player, ball } = gameState;
+
   ball.position[0] = gameState.start.ball.position[0];
   ball.position[1] = gameState.start.ball.position[1];
   ball.velocity[0] = gameState.start.ball.velocity[0];
   ball.velocity[1] = gameState.start.ball.velocity[1];
-
-  //player.position[0] = gameState.start.player.position[0];
-  //player.position[1] = gameState.start.player.position[1];
 
   gameState.highScore = Math.max(gameState.score, gameState.highScore);
   gameState.score = 0;
@@ -211,12 +183,12 @@ function setup() {
 
 (function main() {
   let {canvas, ctx} = setup();
-  let frameTime = performance.now();
+  let frameTime;
 
   ctx.font = '60px sans-serif';
   ctx.fillStyle = '#aaa';
   ctx.textAlign = 'center';
-  ctx.fillText(`CLICK TO START`, gameWidth / 2, gameHeight / 2);
+  ctx.fillText('CLICK TO START', gameWidth / 2, gameHeight / 2);
 
   let tick = function() {
     let newFrameTime = performance.now();
@@ -227,28 +199,27 @@ function setup() {
     ctx.fillStyle = 'rgba(255, 255, 255, .8)';
     ctx.fillRect(0, 0, gameWidth, gameHeight);
 
-    gameState = applyMods(gameState, deltaTime);
+    applyMods(gameState, deltaTime);
     let canvasState = gameStateToCanvasState(gameState);
     canvasStateToCtx(canvasState, ctx);
 
-    window.requestAnimationFrame(tick);
-
     // apply difficulty
-    if (gameState.player.radius > 10) gameState.player.radius -= 0.008;
-    gameState.gravity += 0.02;
-  };
+    if (gameState.player.radius > 10) {
+      gameState.player.radius -= 0.008;
+    }
 
-  canvas.addEventListener('mousemove', mouseControl);
+    gameState.gravity += 0.02;
+
+    window.requestAnimationFrame(tick);
+  };
 
   let start = () => {
     if (canvas.requestPointerLock) canvas.requestPointerLock();
     frameTime = performance.now();
     reset(gameState);
     tick();
-
-    canvas.removeEventListener('click', start);
   };
 
+  canvas.addEventListener('mousemove', mouseControl);
   canvas.addEventListener('click', start);
-
 })();
