@@ -1,0 +1,22 @@
+{
+  "ecmaFeatures": {
+    "destructuring": true,
+    "restParams": true,
+    "jsx": true,
+    "experimentalObjectRestSpread": true
+  },
+  "rules": {
+    "comma-dangle": 0,
+    "no-multiple-empty-lines": [2, {"max": 2}],
+    "no-unused-vars": [2, { "args": "none" }],
+    "prefer-const": 0,
+    "func-names": 1,
+    "no-use-before-define": [2, "nofunc"],
+    "arrow-body-style": 0,
+    "jsx-closing-bracket-location": 0,
+    "no-nested-ternary": 0,
+    "filenames/filenames": [2, "^([a-z][-]?)+[a-z]+$"],
+    "object-curly-spacing": [1, "always"],
+    "prefer-template": 1
+  }
+}

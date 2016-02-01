@@ -1,0 +1,11 @@
+// let collisionDelta = (ball.radius + player.radius) - dist(...ball.position, ...player.position);
+// console.log('angle of collision', an, collisionDelta, ball.position);
+//
+// if (collisionDelta > 0) {
+//   let correction = collisionDelta * Math.sqrt(1 - an * an);
+//   console.log('correction', correction);
+//   //ball.position[1] -= collisionDelta * an;
+//   ball.position[1] -= correction;
+//   //console.log('correct position');
+//   //ball.position[1] -= collisionDelta * (1 - an);
+// }
